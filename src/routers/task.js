@@ -4,38 +4,6 @@ const auth = require('../middleware/auth');
 
 const Task = require('../models/task');
 
-// Tasks Endpoints
-/* Then Promise method */
-// router.post('/tasks', (req, res) => {
-//   const task = new Task(req.body);
-//   task.save().then(result => {
-//     res.status(201).send(result)
-//   }).catch(error => {
-//     res.status(400).send(error);
-//   });
-// })
-
-// router.get('/tasks', (req, res) => {
-//   Task.find({}).then(tasks => {
-//     res.send(tasks);
-//   }).catch(error => {
-//     res.status(500).send(error);
-//   });
-// })
-
-// router.get('/tasks/:id', (req, res) => {
-//   const _id = req.params.id;
-//   Task.find({ _id }).then(task => {
-//     if (!task) {
-//       return res.send(404).send();
-//     }
-//     res.send(task);
-//   }).catch(error => {
-//     res.status(500).send(error);
-//   });
-// })
-
-/* --- async/await method --- */
 router.post('/tasks', auth, async (req, res) => {
   console.log('REQ BODDYY:', req.body);
   const task = new Task({

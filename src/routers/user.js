@@ -4,18 +4,6 @@ const router = express.Router();
 const User = require('../models/user');
 const auth = require('../middleware/auth');
 
-// Users Endpoints
-
-/* Then promise method */
-// router.post('/users', (req, res) => {
-//   const user = new User(req.body).save().then(result => {
-//     res.status(201).send(result)
-//   }).catch(error => {
-//     res.status(400).send(error);
-//   })
-// });
-
-/*  ---- async/await method ---- */
 router.post('/users', async (req, res) => {
   const user = new User(req.body);
   const token = await user.generateAuthToken();
@@ -63,35 +51,9 @@ router.post('/users/logoutAll', auth, async (req, res) => {
   }
 })
 
-// /* Then promise method */
-// router.get('/users', (req, res) => {
-//   User.find({ name: 'Croco' }).then(users => {
-//     res.send(users);
-//   }).catch(error => {
-//     res.status(500).send(error);
-//   })
-// });
-
-/*  ---- async/await method ---- */
 router.get('/users/me', auth, async (req, res) => {
   res.send(req.user);
 });
-
-/* Then promise method */
-// router.get('/users/:id', (req, res) => {
-//   console.log('req.params', req.params);
-//   const _id = req.params.id;
-//   User.findById(_id).then(user => {
-//     if (!user) {
-//       return res.status(404).send();
-//     }
-//     res.send(user);
-//   }).catch(error => {
-//     res.status(500).send();
-//   });
-// });
-
-/*  ---- async/await method ---- */
 
 // NOT USE ANYMORE
 // router.get('/users/:id', async (req, res) => {
