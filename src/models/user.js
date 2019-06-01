@@ -1,14 +1,14 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const Task = require('./task');
+const mongoose = require("mongoose");
+const validator = require("validator");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const Task = require("./task");
 
 let userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    trim: true,
+    trim: true
   },
   email: {
     type: String,
@@ -18,7 +18,7 @@ let userSchema = new mongoose.Schema({
     lowercase: true,
     validate(value) {
       if (!validator.isEmail(value)) {
-        throw new Error('Email is not valid');
+        throw new Error("Email is not valid");
       }
     }
   },
@@ -28,8 +28,8 @@ let userSchema = new mongoose.Schema({
     trim: true,
     minlength: 7,
     validate(value) {
-      if (value.includes('password')) {
-        throw new Error('password is not valid');
+      if (value.includes("password")) {
+        throw new Error("password is not valid");
       }
     }
   },
@@ -38,22 +38,27 @@ let userSchema = new mongoose.Schema({
     default: 0,
     validate(value) {
       if (value < 0) {
-        throw new Error('age  must be a positive number');
+        throw new Error("age  must be a positive number");
       }
     }
   },
-  tokens: [{
-    token: {
-      type: String,
-      required: true,
+  tokens: [
+    {
+      token: {
+        type: String,
+        required: true
+      }
     }
-  }]
+  ],
+  avatar: {
+    type: Buffer
+  }
 });
 
-userSchema.virtual('tasks', {
-  ref: 'Task',
-  localField: '_id',
-  foreignField: 'owner',
+userSchema.virtual("tasks", {
+  ref: "Task",
+  localField: "_id",
+  foreignField: "owner"
 });
 
 userSchema.methods.toJSON = function () {
@@ -62,47 +67,51 @@ userSchema.methods.toJSON = function () {
   const userObject = user.toObject();
   delete userObject.password;
   delete userObject.tokens;
-
+  delete userObject.avatar; // No need to send image profile to user JSON because image are heavy and can create unecessary cost
   return userObject;
 };
 
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
-  console.log('user', user);
+  console.log("user", user);
 
-  const token = await jwt.sign({ _id: user._id.toString() }, 'thisisthegoodplacetobe');
+  const token = await jwt.sign(
+    { _id: user._id.toString() },
+    "thisisthegoodplacetobe"
+  );
 
   user.tokens = user.tokens.concat({ token });
   await user.save();
   return token;
-}
+};
+
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email });
   if (!user) {
-    throw new Error('Enable to login !');
+    throw new Error("Enable to login !");
   }
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw new Error('Wrong password, Unable to login');
+    throw new Error("Wrong password, Unable to login");
   }
   return user;
-}
+};
 // hash a plain text password
-userSchema.pre('save', async function (next) {
+userSchema.pre("save", async function (next) {
   const user = this;
-  if (user.isModified('password')) {
+  if (user.isModified("password")) {
     user.password = await bcrypt.hash(user.password, 8);
   }
   next();
-})
+});
 
 // Delete user tasks when user is removed
-userSchema.pre('remove', async function (next) {
+userSchema.pre("remove", async function (next) {
   const user = this;
   await Task.deleteMany({ owner: user._id });
   next();
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
